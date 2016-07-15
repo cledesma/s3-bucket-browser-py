@@ -1,32 +1,34 @@
 from flask import Flask
-import boto
-import boto.s3.connection
+from boto.s3.connection import S3Connection
 import os
+import logging, logging.config
+
+
+app = Flask(__name__)
 logging.config.fileConfig('conf/logging.conf')
 
 access_key = os.environ['BROWSER_S3_ACCESS_KEY']
 secret_key = os.environ['BROWSER_S3_SECRET_KEY']
 bucket = os.environ['BROWSER_S3_BUCKET']
 endpoint = os.environ['BROWSER_S3_ENDPOINT']
-
-if __name__== "__main__":
-
-    logging.debug("s3_bucket: " + bucket)
-    logging.debug("s3_endpoint: " + endpoint)   
-    if not (access_key or secret_key or bucket or endpoint):
-        logging.info("Missing environment variables")
-    else:
-        app.run('0.0.0.0')
+region_host = os.environ['BROWSER_S3_REGION']
 
 @app.route('/', methods=['GET'])
 def browse():
     logging.info("start browse")
+    message = ""
     try:
+        # conn = S3Connection(access_key,
+        #     secret_key, host=region_host)
+        # logging.info("conn: " + str(conn))
+        # bucket_conn = conn.get_bucket(bucket)
+        # logging.debug("bucket_conn: " + str(bucket_conn))
 
-        bucket_name = s3_bucket
-        conn = boto.connect_s3(access_key,
+        conn = S3Connection(access_key,
             secret_key)
-        bucket_conn = conn.get_bucket(bucket)
+        logging.info("conn: " + str(conn))
+        bucket_conn = conn.get_bucket(bucket, validate=False)
+        logging.debug("bucket_conn: " + str(bucket_conn))
 
         logging.debug("")
         logging.debug("---------------")
@@ -34,11 +36,8 @@ def browse():
             name = key.name
             modified = key.last_modified
             url = key.generate_url(expires_in=0, query_auth=False, force_http=True)
-            print "{name}\t{modified}\t{url}".format(
-                name = name,
-                modified = modified,
-                url = url
-            )
+            x = '<p><a href="' + url + '">' + name + '</a></p>'
+            message = message + x
             logging.debug("")
             logging.debug("name: " + name)
             logging.debug("modified: " + modified)
@@ -47,9 +46,21 @@ def browse():
         logging.debug("---------------")
         logging.debug("")       
 
-        message = 'Success
         logging.info("browse success")
     except Exception, e:
         message = "Error"
-        logging.info("browse fail")
+        logging.info("browse fail: " + str(e))
     return message
+
+
+if __name__== "__main__":
+
+    logging.debug("s3_bucket: " + bucket)
+    logging.debug("s3_endpoint: " + endpoint)   
+    logging.debug("access_key: " + access_key)
+    logging.debug("secret_key: " + secret_key)  
+    logging.debug("region_host: " + region_host)  
+    if not (access_key or secret_key or bucket or endpoint):
+        logging.info("Missing environment variables")
+    else:
+        app.run('0.0.0.0')
