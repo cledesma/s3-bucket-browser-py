@@ -63,4 +63,4 @@ if __name__== "__main__":
     if not (access_key or secret_key or bucket or endpoint):
         logging.info("Missing environment variables")
     else:
-        app.run('0.0.0.0')
+        app.run(host='0.0.0.0', port=80)
