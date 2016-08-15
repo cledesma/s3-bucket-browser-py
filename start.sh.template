@@ -1,0 +1,9 @@
+export BROWSER_S3_ACCESS_KEY="abcdefghijklmnop"
+export BROWSER_S3_SECRET_KEY="abcdefghijklmnop"
+export BROWSER_S3_BUCKET="bucket-name"
+export BROWSER_S3_ENDPOINT="s3-eu-west-1.amazonaws.com"
+export BROWSER_S3_REGION="eu-west-1"
+export BROWSER_S3_PORT="123"
+export BROWSER_S3_PROXY="http://localhost:123/"
+nohup python main.py > browser.out &
+tail -f browser.out
